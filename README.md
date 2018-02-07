@@ -1,25 +1,25 @@
 # Proto RPC
 
-This project provides a simple and easy-to-use library for handling
-proto-over-http RPC protocols.
+This project provides a simple and easy-to-use client library for
+handling various proto-over-http RPC protocols.
 
 ## Overview
 
 There are many proto-over-http RPC protocols, such as `prpc` and
-`Twirp`, and each of them requires its own framework and runtime
-library. However, most of them only differ on the URL structure, HTTP
-headers, and the error payload format. By making these features
-customizable by the application, a single client library can directly
-support multiple wire protocols.
+`Twirp`. Each protocol uses its own framework and runtime library.
+However, most of these protocols differ on the URL structure, HTTP
+headers, and the error format. By making these features customizable
+by the application, one client library can support multiple wire
+protocols with minimum complexity.
 
-Another issue is the existing frameworks typically use `protoc`
-plugins to generate the client and the server stubs. While such stubs
-provide type safety and ease of use, it may not be necessary for many
-RPC use cases. This library uses a different API design to avoid any
-code generation while provide similar type safety and usability, see
+Most proto-over-http frameworks ues `protoc` plugins to generate the
+client and the server libraries. While such libraries provide type
+safety and ease of use, it is often not necessary for many RPC use
+cases. This library uses a different API design pattern to avoid any
+code generation while provide similar type safety and usability. See
 the following example in Go language:
 
-With code generated stub
+With code generated client
 ```
 request := &FooRequest{...}
 response, err := stub.Foo(ctx, request)
@@ -31,6 +31,12 @@ request := &FooRequest{...}
 response := &FooResponse{}
 err := client.Call(ctx, "Foo", request, response)
 ```
+
+Conceptually, we use `printf()` like experience for making RPC
+calls. By having an extra parameter to specify the method name,
+we can avoid codegen completely. While `printf()` may not provide
+type safety, developers hardly ever get it wrong. This library
+brings the same experience to RPC calls.
 
 ## Status
 

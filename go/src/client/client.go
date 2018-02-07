@@ -33,51 +33,51 @@ type Client struct {
 	// OPTIONAL. Google API Key.
 	ApiKey string
 	// REQUIRED. The proto message for the error payload.
-	Error proto.Message
+	Status proto.Message
 }
 
 // Represent an error, supporting both client error and server error.
-type Status struct {
+type Error struct {
 	// The http status code. For client errors, the `Code` is 900.
 	Code int
 	// The http status message or local error message if the Code is 900.
 	Message string
 	// The error payload.
-	Payload proto.Message
+	Status proto.Message
 }
 
 // Implement error interface for Status.
-func (s *Status) Error() string {
-	if s.Payload != nil {
-		return proto.MarshalTextString(s.Payload)
+func (err *Error) Error() string {
+	if err.Status != nil {
+		return proto.MarshalTextString(err.Status)
 	}
-	return s.Message
+	return err.Message
 }
 
 // Make a RPC call and return its `Status`.
 func (c *Client) Call(ctx context.Context, method string, req proto.Message, res proto.Message) error {
 	request, err := c.createRequest(ctx, c.BaseURL+method, req)
 	if err != nil {
-		return &Status{900, err.Error(), nil}
+		return &Error{900, err.Error(), nil}
 	}
 	response, err := c.sendRequest(ctx, request)
 	if err != nil {
-		return &Status{900, err.Error(), nil}
+		return &Error{900, err.Error(), nil}
 	}
 	if response.StatusCode >= 200 && response.StatusCode < 300 {
 		// Handle successful response.
 		err = c.handleResponse(ctx, response, res)
 		if err != nil {
-			return &Status{900, err.Error(), nil}
+			return &Error{900, err.Error(), nil}
 		}
 		return nil
 	} else {
 		// Handle error response.
-		payload := proto.Clone(c.Error)
-		if c.handleResponse(ctx, response, payload) != nil {
-			payload = nil
+		status := proto.Clone(c.Status)
+		if c.handleResponse(ctx, response, status) != nil {
+			status = nil
 		}
-		return &Status{response.StatusCode, response.Status, payload}
+		return &Error{response.StatusCode, response.Status, status}
 	}
 }
 
@@ -126,5 +126,5 @@ func (c *Client) handleResponse(ctx context.Context, response *http.Response, re
 	if strings.HasPrefix(ct, "application/json") {
 		return jsonpb.Unmarshal(response.Body, res)
 	}
-	return &Status{900, "Unsupported content type '" + ct + "'.", nil}
+	return &Error{900, "Unsupported content type '" + ct + "'.", nil}
 }

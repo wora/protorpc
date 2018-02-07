@@ -16,7 +16,7 @@ func main() {
 		ContentType: "application/x-protobuf",
 		UserAgent: "listservices/0.1",
 		ApiKey: "...",
-		Error: &status.Status{},
+		Status: &status.Status{},
 	}
 	request := &sm.ListServicesRequest{}
 	response := &sm.ListServicesResponse{}
