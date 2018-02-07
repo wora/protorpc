@@ -1,7 +1,7 @@
 # Proto RPC
 
-This project provides a simple and easy-to-use client library for
-handling various proto-over-http RPC protocols.
+This project provides a simple and easy-to-use library for working
+with various proto-over-http RPC protocols.
 
 ## Overview
 
@@ -25,7 +25,7 @@ request := &FooRequest{...}
 response, err := stub.Foo(ctx, request)
 ```
 
-Without code generated stub
+Without code generated client
 ```
 request := &FooRequest{...}
 response := &FooResponse{}
