@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package main;
+
+// Error represents an error in a Twirp service call.
+message Error {
+  // identifies a valid error type
+  string code = 1;
+  // free-form human-readable message
+  string msg = 2;
+  // attached metadata value
+  map<string, string> meta = 3;
+}
