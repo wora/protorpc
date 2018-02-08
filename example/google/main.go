@@ -1,6 +1,6 @@
 package main
 
-import "client"
+import "github.com/googleapis/go-protorpc/client"
 import "fmt"
 import "context"
 
