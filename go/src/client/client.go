@@ -54,7 +54,7 @@ func (err *Error) Error() string {
 	return err.Message
 }
 
-// Make a RPC call and return its `Status`.
+// Make a RPC call and return an `Error` if any.
 func (c *Client) Call(ctx context.Context, method string, req proto.Message, res proto.Message) error {
 	request, err := c.createRequest(ctx, c.BaseURL+method, req)
 	if err != nil {
