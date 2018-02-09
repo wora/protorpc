@@ -3,26 +3,26 @@
 This project provides a simple and easy-to-use library for working
 with multiple proto-over-http RPC protocols.
 
-## Overview
+## Introduction
 
 There are many proto-over-http RPC protocols, such as `prpc` and
 `Twirp`. Each protocol uses its own framework and runtime library.
 However, most of these protocols only differ on the URL structure,
 HTTP headers, and the error format. By making these features
 customizable by the application, a single library can support
-multiple protocols with great usability and minimum complexity.
+multiple wire protocols with great usability and minimum complexity.
 
 ## Design
 
 Most proto-over-http frameworks ues `protoc` plugins to generate the
 client and the server libraries. While such libraries provide type
-safety and ease of use, they are not strictly necessary for many RPC
-use cases. The plugins add complexity to the build system, and often
-have compatibility issues.
+safety and ease of use, they also put restrictions on many use cases,
+such as mandating the URL structure. The `protoc` plugins also add
+complexity to the build system, and introduce compatibility issues.
 
 This library uses a different *API design pattern* to avoid the
-code generation, while provide similar type safety and usability,
-see below:
+code generation, while provide good type safety, flexibility and
+usability, see the following below:
 
 With code generation
 ```Go
@@ -44,6 +44,24 @@ calls. By having an extra parameter to specify the method name,
 we can avoid codegen completely. While `printf()` may not provide
 type safety, developers rarely use it wrong. This library brings
 the same experience to RPC calls.
+
+## Protocol Support
+
+This library supports any proto-over-http protocol that meets the
+following requirements:
+
+* Each RPC endpoint is identified by a unique HTTP URL, which is
+  published by API documentation or API service discovery. This
+  library does not impose any restriction on the URL structure,
+
+* All requests are sent using an HTTP POST method.
+
+* The request and response messages are passed via HTTP bodies.
+
+* The error response is passed via HTTP response body.
+
+* Only proto JSON and proto binary encodings are supported, but
+  proto text and proto yaml can be added in the future.
 
 ## Status
 
