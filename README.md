@@ -12,7 +12,7 @@ HTTP headers, and the error format. By making these features
 customizable by the application, a single library can support
 multiple protocols with great usability and minimum complexity.
 
-## Usage
+## Design
 
 Most proto-over-http frameworks ues `protoc` plugins to generate the
 client and the server libraries. While such libraries provide type
