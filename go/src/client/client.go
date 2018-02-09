@@ -55,6 +55,14 @@ func (err *Error) Error() string {
 }
 
 // Make a RPC call and return an `Error` if any.
+//
+// The method name will be appended to the BaseURL to form the
+// full URL for making the RPC call. The method name may contain
+// URL query parameter(s), so it can address arbitrary RPC call
+// that can be expressed as an HTTP URL.
+//
+// The `req` and `res` are the request and the response message
+// as defined in the proto file.
 func (c *Client) Call(ctx context.Context, method string, req proto.Message, res proto.Message) error {
 	request, err := c.createRequest(ctx, c.BaseURL+method, req)
 	if err != nil {
