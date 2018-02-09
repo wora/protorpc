@@ -25,15 +25,14 @@ func NewClient(ctx context.Context, baseUrl string) (*client.Client, error) {
 }
 
 func main() {
-	ctx := context.Background()
-	c, err := NewClient(ctx, "...")
+	c, err := NewClient(context.Background(), "...")
 	if err != nil {
 		fmt.Print(err.Error())
 		return
 	}
 	request := &sm.ListServicesRequest{}
 	response := &sm.ListServicesResponse{}
-	err = c.Call(ctx, "ListServices", request, response)
+	err = c.Call(context.Background(), "ListServices", request, response)
 	if err != nil {
 		fmt.Print(err.Error())
 	} else {
