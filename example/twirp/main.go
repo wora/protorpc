@@ -1,10 +1,10 @@
 package main
 
-import "client"
 import "net/http"
 import "fmt"
 import "context"
 
+import client "github.com/wora/protorpc/client"
 import proto "github.com/golang/protobuf/proto"
 
 // The following function provides equivalent functionality as the

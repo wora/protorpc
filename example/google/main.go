@@ -1,10 +1,10 @@
 package main
 
-import "client"
 import "fmt"
 import "context"
 
 import sm "google.golang.org/genproto/googleapis/api/servicemanagement/v1"
+import client "github.com/wora/protorpc/client"
 import proto "github.com/golang/protobuf/proto"
 import status "google.golang.org/genproto/googleapis/rpc/status"
 import google "golang.org/x/oauth2/google"
