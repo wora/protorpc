@@ -52,16 +52,19 @@ following requirements:
 
 * Each RPC endpoint is identified by a unique HTTP URL, which is
   published by API documentation or API service discovery. This
-  library does not impose any restriction on the URL structure,
+  library does not impose any restriction on the URL structure.
 
-* All requests are sent using an HTTP POST method.
+* Each RPC request is sent using an HTTP POST method. Other HTTP
+  methods can be added later if needed.
 
 * The request and response messages are passed via HTTP bodies.
 
 * The error response is passed via HTTP response body.
 
 * Only proto JSON and proto binary encodings are supported, but
-  proto text and proto yaml can be added in the future.
+  proto text and proto yaml can be added in the future. The
+  encoding format must be specified by the `Content-Type` HTTP
+  header.
 
 ## Status
 
@@ -70,5 +73,5 @@ It can be seamlessly integrated with an auth library for real use
 cases. Please see the `example` directory on how to use the library.
 
 Since the library has much less than 200 lines of code, it can be
-easily transcoded into other programming languages where proto3 is
+easily transcoded into other programming languages where proto is
 supported.
