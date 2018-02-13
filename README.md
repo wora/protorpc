@@ -47,8 +47,10 @@ the same experience to RPC calls.
 
 ## Protocol Support
 
-This library supports any proto-over-http protocol that meets the
-following requirements:
+**URL Request -> Response | Error**
+
+This library supports any proto-over-http protocol that meets
+these requirements:
 
 * Each RPC endpoint is identified by a unique HTTP URL, which is
   published by API documentation or API service discovery. This
