@@ -47,7 +47,12 @@ the same experience to RPC calls.
 
 ## Protocol Support
 
-**URL Request -> Response | Error**
+All proto-over-http protocols have the following general
+semantics:
+
+```
+URL Request -> ( Response | Error )
+```
 
 This library supports any proto-over-http protocol that meets
 these requirements:
@@ -57,16 +62,18 @@ these requirements:
   library does not impose any restriction on the URL structure.
 
 * Each RPC request is sent using an HTTP POST method. Other HTTP
-  methods can be added later if needed.
+  methods can be supported if needed.
 
-* The request and response messages are passed via HTTP bodies.
+* The request messages are passed via HTTP request body.
 
-* The error response is passed via HTTP response body.
+* The response messages and the error payloads are passed via
+  HTTP response body.
 
 * Only proto JSON and proto binary encodings are supported, but
-  proto text and proto yaml can be added in the future. The
-  encoding format must be specified by the `Content-Type` HTTP
-  header.
+  proto text and proto yaml can be added if needed. The encoding
+  format must be specified by the `Content-Type` HTTP header.
+
+* Protocol-specific metadata can be passed via HTTP headers.
 
 ## Status
 
