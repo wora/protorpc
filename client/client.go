@@ -123,6 +123,7 @@ func (c *Client) sendRequest(ctx context.Context, request *http.Request) (*http.
 }
 
 func (c *Client) handleResponse(ctx context.Context, response *http.Response, res proto.Message) error {
+	defer response.Body.Close()
 	ct := response.Header.Get("Content-Type")
 	if strings.Contains(ct, "protobuf") {
 		data, err := ioutil.ReadAll(response.Body)
