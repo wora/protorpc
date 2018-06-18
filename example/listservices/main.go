@@ -3,23 +3,25 @@ package main
 import "net/http"
 import "fmt"
 import "context"
+import "os"
 
-import sm "google.golang.org/genproto/googleapis/api/servicemanagement/v1"
 import client "github.com/wora/protorpc/client"
 import proto "github.com/golang/protobuf/proto"
-import status "google.golang.org/genproto/googleapis/rpc/status"
+import servicemanagement "google.golang.org/genproto/googleapis/api/servicemanagement/v1"
 
 func main() {
-	c := &client.Client{
-		BaseURL: "...",
-		HTTP: http.DefaultClient,
-		ContentType: "application/x-protobuf",
-		UserAgent: "listservices/0.1",
-		ApiKey: "...",
-		Status: &status.Status{},
+	if len(os.Args) < 3 {
+		fmt.Print("Usage: cmd baseUrl apiKey")
+		return
 	}
-	request := &sm.ListServicesRequest{}
-	response := &sm.ListServicesResponse{}
+	c := &client.Client{
+		HTTP: http.DefaultClient,
+		BaseURL: os.Args[1],
+		UserAgent: "listservices/0.1",
+		ApiKey: os.Args[2],
+	}
+	request := &servicemanagement.ListServicesRequest{}
+	response := &servicemanagement.ListServicesResponse{}
 	err := c.Call(context.Background(), "ListServices", request, response)
 	if err != nil {
 		fmt.Print(err.Error())

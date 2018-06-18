@@ -1,13 +1,14 @@
 package main
 
+import "os"
 import "fmt"
 import "context"
 
-import sm "google.golang.org/genproto/googleapis/api/servicemanagement/v1"
 import client "github.com/wora/protorpc/client"
 import proto "github.com/golang/protobuf/proto"
-import status "google.golang.org/genproto/googleapis/rpc/status"
 import google "golang.org/x/oauth2/google"
+
+import servicemanagement "google.golang.org/genproto/googleapis/api/servicemanagement/v1"
 
 func NewClient(ctx context.Context, baseUrl string) (*client.Client, error) {
 	http, err := google.DefaultClient(ctx, "https://www.googleapis.com/auth/cloud-platform")
@@ -15,23 +16,25 @@ func NewClient(ctx context.Context, baseUrl string) (*client.Client, error) {
 		return nil, err
 	}
 	c := &client.Client{
-		BaseURL:     baseUrl,
 		HTTP:        http,
-		ContentType: "application/x-protobuf",
+		BaseURL:     baseUrl,
 		UserAgent:   "protorpc/0.1",
-		Status:      &status.Status{},
 	}
 	return c, nil
 }
 
 func main() {
-	c, err := NewClient(context.Background(), "...")
+	if len(os.Args) < 2 {
+		fmt.Print("Usage: cmd baseUrl")
+		return
+	}
+	c, err := NewClient(context.Background(), os.Args[1])
 	if err != nil {
 		fmt.Print(err.Error())
 		return
 	}
-	request := &sm.ListServicesRequest{}
-	response := &sm.ListServicesResponse{}
+	request := &servicemanagement.ListServicesRequest{}
+	response := &servicemanagement.ListServicesResponse{}
 	err = c.Call(context.Background(), "ListServices", request, response)
 	if err != nil {
 		fmt.Print(err.Error())

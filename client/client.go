@@ -4,6 +4,7 @@ package client
 import jsonpb "github.com/golang/protobuf/jsonpb"
 import proto "github.com/golang/protobuf/proto"
 import context "golang.org/x/net/context"
+import status "google.golang.org/genproto/googleapis/rpc/status"
 
 import "bytes"
 import "io"
@@ -19,39 +20,25 @@ import "strings"
 // message and unmarshals the response message, and use the provided
 // http transport to handle the http request.
 type Client struct {
-	// REQUIRED. The base url used for this client.
-	BaseURL string
-	// REQUIRED. The http client used for this client.
+	// REQUIRED. The HTTP client used for this API client stub.
+	// The client library assumes the HTTP client also handles
+	// API authentication by attaching the correct Authorization
+	// header to the request.
 	HTTP *http.Client
-	// REQUIRED. The content type used for the proto encoding.  It must
-	// start with "application/json" for JSON encoding or contain the
-	// word "protobuf" for proto binary encoding. Other encodings can be
-	// supported in the future.
-	ContentType string
-	// REQUIRED. The user agent string for sending request.
+	// REQUIRED. The base URL used for this client stub.
+	BaseURL string
+	// REQUIRED. The user agent string for sending the request.
 	UserAgent string
-	// OPTIONAL. Google API Key.
+	// OPTIONAL. The Google API Key used for sending the request.
 	ApiKey string
-	// REQUIRED. The proto message for the error payload.
-	Status proto.Message
+
 }
 
-// Represent an error, supporting both client error and server error.
-type Error struct {
-	// The http status code. For client errors, the `Code` is 900.
-	Code int
-	// The http status message or local error message if the Code is 900.
-	Message string
-	// The error payload.
-	Status proto.Message
-}
+// Defines `google.rpc.Status` as an error type.
+type Error status.Status
 
-// Implement error interface for Status.
-func (err *Error) Error() string {
-	if err.Status != nil {
-		return proto.MarshalTextString(err.Status)
-	}
-	return err.Message
+func (e *Error) Error() string {
+     return fmt.Sprintf("gRPC error: code %d, message %q", e.Code, e.Message)
 }
 
 // Make a RPC call and return an `Error` if any.
@@ -61,54 +48,45 @@ func (err *Error) Error() string {
 // URL query parameter(s), so it can address arbitrary RPC call
 // that can be expressed as an HTTP URL.
 //
-// The `req` and `res` are the request and the response message
-// as defined in the proto file.
+// The `req` and `res` are the request and the response message.
+// For RPC errors, the returned error will be `google.rpc.Status`.
 func (c *Client) Call(ctx context.Context, method string, req proto.Message, res proto.Message) error {
 	request, err := c.createRequest(ctx, c.BaseURL+method, req)
 	if err != nil {
-		return &Error{900, err.Error(), nil}
+		return err
 	}
 	response, err := c.sendRequest(ctx, request)
 	if err != nil {
-		return &Error{900, err.Error(), nil}
+		return err
 	}
 	if response.StatusCode >= 200 && response.StatusCode < 300 {
-		// Handle successful response.
-		err = c.handleResponse(ctx, response, res)
-		if err != nil {
-			return &Error{900, err.Error(), nil}
-		}
-		return nil
+		// Handle OK response.
+		return c.handleResponse(ctx, response, res)
 	} else {
 		// Handle error response.
-		status := proto.Clone(c.Status)
-		if c.handleResponse(ctx, response, status) != nil {
-			status = nil
+		s := &status.Status{}
+		err = c.handleResponse(ctx, response, s)
+		if err != nil {
+			return err
 		}
-		return &Error{response.StatusCode, response.Status, status}
+		return s
 	}
 }
 
 func (c *Client) createRequest(ctx context.Context, url string, req proto.Message) (*http.Request, error) {
 	var body io.Reader
-	if strings.Contains(c.ContentType, "protobuf") {
-		data, err := proto.Marshal(req)
-		if err != nil {
-			return nil, err
-		}
-		body = bytes.NewBuffer(data)
-	} else {
-		data, err := (&jsonpb.Marshaler{}).MarshalToString(req)
-		if err != nil {
-			return nil, err
-		}
-		body = bytes.NewBufferString(data)
+	// Marshalls request message into bytes.
+	data, err := proto.Marshal(req)
+	if err != nil {
+		return nil, err
 	}
+	body = bytes.NewBuffer(data)
 	request, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return nil, err
 	}
-	request.Header.Set("Content-Type", c.ContentType)
+	request.Header.Set("Content-Type", "application/x-protobuf")
+	request.Header.Set("Accept", "application/x-protobuf")
 	if c.UserAgent != "" {
 		request.Header.Set("User-Agent", c.UserAgent)
 	}
@@ -125,15 +103,12 @@ func (c *Client) sendRequest(ctx context.Context, request *http.Request) (*http.
 func (c *Client) handleResponse(ctx context.Context, response *http.Response, res proto.Message) error {
 	defer response.Body.Close()
 	ct := response.Header.Get("Content-Type")
-	if strings.Contains(ct, "protobuf") {
+	if strings.HasPrefix(ct, "application/x-protobuf") {
 		data, err := ioutil.ReadAll(response.Body)
 		if err != nil {
 			return err
 		}
 		return proto.Unmarshal(data, res)
 	}
-	if strings.HasPrefix(ct, "application/json") {
-		return jsonpb.Unmarshal(response.Body, res)
-	}
-	return &Error{900, "Unsupported content type '" + ct + "'.", nil}
+	return &Error{2, "Unsupported content type '" + ct + "'."}
 }
