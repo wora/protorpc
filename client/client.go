@@ -1,7 +1,6 @@
 
 package client
 
-import jsonpb "github.com/golang/protobuf/jsonpb"
 import proto "github.com/golang/protobuf/proto"
 import context "golang.org/x/net/context"
 import status "google.golang.org/genproto/googleapis/rpc/status"
@@ -11,6 +10,7 @@ import "io"
 import "io/ioutil"
 import "net/http"
 import "strings"
+import "fmt"
 
 // A generic client for performing proto-over-http RPCs. This client
 // lets the application control the RPC endpoints, error format,
@@ -65,11 +65,7 @@ func (c *Client) Call(ctx context.Context, method string, req proto.Message, res
 	} else {
 		// Handle error response.
 		s := &status.Status{}
-		err = c.handleResponse(ctx, response, s)
-		if err != nil {
-			return err
-		}
-		return s
+		return c.handleResponse(ctx, response, s)
 	}
 }
 
@@ -108,7 +104,12 @@ func (c *Client) handleResponse(ctx context.Context, response *http.Response, re
 		if err != nil {
 			return err
 		}
+		fmt.Println(proto.Unmarshal(data, res))
+		fmt.Println(res)
 		return proto.Unmarshal(data, res)
+	} else {
+		data, _ := ioutil.ReadAll(response.Body)
+		fmt.Println(string(data))
 	}
-	return &Error{2, "Unsupported content type '" + ct + "'."}
+	return &Error{Code:2, Message:"Unsupported content type '" + ct + "'."}
 }
