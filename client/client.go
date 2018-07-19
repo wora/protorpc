@@ -66,11 +66,7 @@ func (c *Client) Call(ctx context.Context, method string, req proto.Message, res
 	} else {
 		// Handle error response.
 		s := &status.Status{}
-		err = c.handleResponse(ctx, response, s)
-		if err != nil {
-			return err
-		}
-		return s
+		return c.handleResponse(ctx, response, s)
 	}
 }
 
@@ -109,7 +105,12 @@ func (c *Client) handleResponse(ctx context.Context, response *http.Response, re
 		if err != nil {
 			return err
 		}
+		fmt.Println(proto.Unmarshal(data, res))
+		fmt.Println(res)
 		return proto.Unmarshal(data, res)
+	} else {
+		data, _ := ioutil.ReadAll(response.Body)
+		fmt.Println(string(data))
 	}
 	return &Error{Code: 2, Message: "Unsupported content type '" + ct + "'."}
 }
