@@ -7,6 +7,7 @@ import (
 	"strings"
 	"net/http"
 	"fmt"
+	"github.com/shinfan/sgauth"
 
 	proto "github.com/golang/protobuf/proto"
 	context "golang.org/x/net/context"
@@ -33,6 +34,25 @@ type Client struct {
 	// OPTIONAL. The Google API Key used for sending the request.
 	ApiKey string
 
+}
+
+// Creates a client with the given credentials. Application default credentials
+// will be used if no credentials are provided.
+// For more information about application default credentials please read:
+// https://cloud.google.com/docs/authentication/production
+func NewClient(ctx context.Context, credentials *sgauth.Credentials) (*Client, error) {
+	http, err := sgauth.NewHTTPClient(ctx, credentials)
+	if err != nil {
+		return nil, err
+	}
+	baseUrl := fmt.Sprintf("https://%s/$rpc/%s/",
+		credentials.ServiceAccount.ServiceName, credentials.ServiceAccount.APIName)
+	return &Client{
+		HTTP:        http,
+		BaseURL:     baseUrl,
+		UserAgent:   "protorpc/0.1",
+		ApiKey: credentials.APIKey,
+	}, nil
 }
 
 // Defines `google.rpc.Status` as an error type.
