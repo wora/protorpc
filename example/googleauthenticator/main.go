@@ -14,7 +14,8 @@ func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: cmd baseUrl")
 		fmt.Println("Sample cmd: go run main.go " +
-			"https://servicemanagement.googleapis.com/$rpc/google.api.servicemanagement.v1.ServiceManager/")
+			"https://servicemanagement.googleapis.com/$rpc/" +
+			"google.api.servicemanagement.v1.ServiceManager/")
 		return
 	}
 
