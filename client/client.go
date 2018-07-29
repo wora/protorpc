@@ -46,11 +46,7 @@ func NewClient(ctx context.Context, settings *sgauth.Settings, baseUrl string) (
 	}
 	if settings.AuthMethod() == sgauth.MethodJWT && settings.Audience == "" {
 		// Derive audience from url if using JWT and aud is not provided explicitly.
-		urlTokens := strings.Split(baseUrl, "/")
-		host := urlTokens[2]
-		api_name := urlTokens[4]
-		settings.Audience = fmt.Sprintf("https://%s/%s", host, api_name)
-		println(settings.Audience)
+		settings.Audience = createAudience(baseUrl)
 	}
 	return createClient(ctx, settings, baseUrl)
 }
