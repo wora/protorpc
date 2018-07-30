@@ -7,24 +7,25 @@ import (
 	"github.com/wora/protorpc/client"
 	"github.com/golang/protobuf/proto"
 	"google.golang.org/genproto/googleapis/api/servicemanagement/v1"
+	"github.com/shinfan/sgauth"
 )
 
-
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("Usage: cmd baseUrl")
-		fmt.Println("Sample cmd: go run main.go " +
-			"https://servicemanagement.googleapis.com/$rpc/" +
-			"google.api.servicemanagement.v1.ServiceManager/")
+	if len(os.Args) < 3 {
+		fmt.Println("Usage: cmd aud baseUrl")
 		return
 	}
-
-	c, err := client.NewClient(context.Background(), nil, os.Args[1])
+	http, err := sgauth.NewHTTPClient(context.Background(), &sgauth.Settings{
+		Audience: os.Args[1],
+	})
 	if err != nil {
-		fmt.Print(err.Error())
-		return
+		fmt.Println(err.Error())
 	}
-
+	c:= &client.Client{
+		HTTP:        http,
+		BaseURL:     os.Args[2],
+		UserAgent:   "protorpc/0.1",
+	}
 	request := &servicemanagement.ListServicesRequest{}
 	response := &servicemanagement.ListServicesResponse{}
 	err = c.Call(context.Background(), "ListServices", request, response)
