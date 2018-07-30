@@ -7,10 +7,9 @@ import (
 	"strings"
 	"net/http"
 	"fmt"
-
-	proto "github.com/golang/protobuf/proto"
-	context "golang.org/x/net/context"
-	status "google.golang.org/genproto/googleapis/rpc/status"
+	"github.com/golang/protobuf/proto"
+	"golang.org/x/net/context"
+	"google.golang.org/genproto/googleapis/rpc/status"
 )
 
 // A generic client for performing proto-over-http RPCs. This client
@@ -32,7 +31,6 @@ type Client struct {
 	UserAgent string
 	// OPTIONAL. The Google API Key used for sending the request.
 	ApiKey string
-
 }
 
 // Defines `google.rpc.Status` as an error type.
